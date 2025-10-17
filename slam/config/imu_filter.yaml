@@ -1,0 +1,162 @@
+# Save as: config/imu_filter.yaml
+# IMU filtering and calibration for multi-rate sensor fusion
+
+# Pixhawk IMU Filter (50Hz)
+imu_filter_pixhawk:
+  ros__parameters:
+    use_mag: false
+    publish_tf: false
+    world_frame: 'enu'  # East-North-Up
+    
+    # Madgwick filter parameters for Pixhawk
+    gain: 0.1
+    zeta: 0.0
+    mag_bias_x: 0.0
+    mag_bias_y: 0.0
+    mag_bias_z: 0.0
+    
+    # Orientation initialization
+    stateless: false
+    reverse_tf: false
+
+# Front D435i IMU Filter (200Hz gyro, 100Hz accel)
+imu_filter_front:
+  ros__parameters:
+    use_mag: false
+    publish_tf: false
+    world_frame: 'enu'
+    
+    # Complementary filter for high-rate data
+    gain: 0.05  # Lower gain for high frequency
+    zeta: 0.0
+    
+    # Handle different gyro/accel rates
+    stateless: false
+    reverse_tf: false
+
+# Back D435i IMU Filter (200Hz gyro, 100Hz accel)
+imu_filter_back:
+  ros__parameters:
+    use_mag: false
+    publish_tf: false
+    world_frame: 'enu'
+    
+    gain: 0.05
+    zeta: 0.0
+    stateless: false
+    reverse_tf: false
+
+# Robot Localization - Advanced EKF Configuration
+ekf_filter_node:
+  ros__parameters:
+    frequency: 100.0
+    sensor_timeout: 0.05
+    two_d_mode: false
+    
+    # Frames
+    map_frame: 'map'
+    odom_frame: 'odom'
+    base_link_frame: 'base_link'
+    world_frame: 'odom'
+    
+    # Publishing
+    publish_tf: true
+    publish_acceleration: true
+    
+    # Smooth Lagged Data (helps with multi-rate fusion)
+    smooth_lagged_data: true
+    history_length: 0.5  # 500ms history
+    
+    # Dynamic Process Noise (adapts to motion)
+    dynamic_process_noise_covariance: true
+    
+    # IMU 0: Pixhawk @ 50Hz (PRIMARY ORIENTATION)
+    imu0: '/mavros/imu/data'
+    imu0_config: [false, false, false,   # position
+                  true,  true,  true,    # orientation (PRIMARY)
+                  false, false, false,   # velocity
+                  true,  true,  true,    # angular velocity
+                  true,  true,  true]    # acceleration
+    imu0_differential: false
+    imu0_relative: false
+    imu0_queue_size: 5
+    imu0_remove_gravitational_acceleration: true
+    imu0_nodelay: false
+    
+    # Rejection thresholds (3-sigma)
+    imu0_pose_rejection_threshold: 0.8
+    imu0_twist_rejection_threshold: 0.8
+    imu0_linear_acceleration_rejection_threshold: 0.8
+    
+    # IMU 1: Front D435i @ 200/100Hz (HIGH-RATE MOTION)
+    imu1: '/camera_front/camera_front/imu'
+    imu1_config: [false, false, false,
+                  false, false, false,   # Don't fuse orientation (trust Pixhawk)
+                  false, false, false,
+                  true,  true,  true,    # High-rate angular velocity
+                  true,  true,  true]    # High-rate acceleration
+    imu1_differential: false
+    imu1_relative: false
+    imu1_queue_size: 20  # Larger for high rate
+    imu1_remove_gravitational_acceleration: true
+    imu1_nodelay: true  # Process immediately
+    
+    imu1_pose_rejection_threshold: 1.0
+    imu1_twist_rejection_threshold: 0.5  # Tighter for high-rate
+    imu1_linear_acceleration_rejection_threshold: 0.8
+    
+    # IMU 2: Back D435i @ 200/100Hz (REDUNDANCY)
+    imu2: '/camera_back/camera_back/imu'
+    imu2_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  true,  true,  true,
+                  true,  true,  true]
+    imu2_differential: false
+    imu2_relative: false
+    imu2_queue_size: 20
+    imu2_remove_gravitational_acceleration: true
+    imu2_nodelay: true
+    
+    imu2_pose_rejection_threshold: 1.0
+    imu2_twist_rejection_threshold: 0.5
+    imu2_linear_acceleration_rejection_threshold: 0.8
+    
+    # Process Noise Covariance (15x15 matrix)
+    # Order: x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az
+    process_noise_covariance: [
+      0.05, 0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,
+      0.0,  0.05, 0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,
+      0.0,  0.0,  0.06, 0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,
+      0.0,  0.0,  0.0,  0.015, 0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,  # roll
+      0.0,  0.0,  0.0,  0.0,   0.015, 0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,  # pitch
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.04,  0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,  # yaw
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.025, 0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.025, 0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.0,
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.04, 0.0,   0.0,   0.0,   0.0,  0.0,  0.0,
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.006, 0.0,   0.0,   0.0,  0.0,  0.0,  # gyro X
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.006, 0.0,   0.0,  0.0,  0.0,  # gyro Y
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.012, 0.0,  0.0,  0.0,  # gyro Z
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.01, 0.0,  0.0,  # accel X
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.01, 0.0,  # accel Y
+      0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0,   0.0,  0.0,   0.0,   0.0,   0.0,  0.0,  0.015 # accel Z
+    ]
+    
+    # Initial state covariance (start with high uncertainty)
+    initial_estimate_covariance: [
+      1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1e-9
+    ]
