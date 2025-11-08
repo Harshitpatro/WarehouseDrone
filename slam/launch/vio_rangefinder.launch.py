@@ -20,13 +20,10 @@ def generate_launch_description():
     declare_left_serial = DeclareLaunchArgument(
         'left_serial', default_value='319522067209',
         description='Serial number of left D415 camera')
-        
     declare_down_serial = DeclareLaunchArgument(
         'down_serial', default_value='323522061991',
         description='Serial number of down D415 camera')
-    declare_back_serial = DeclareLaunchArgument(
-        'back_serial', default_value='327122076542',
-        description='Serial number of back D415 camera')
+        
     # Front D435i - MASTER
     front_camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -40,29 +37,26 @@ def generate_launch_description():
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,480,30',
-            'rgb_camera.color_profile': '640,480,30',
-            
+            'depth_module.depth_profile': '424,240,30',
+            'rgb_camera.color_profile': '424,240,30',
+            'depth_module.emitter_enabled': '1',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
             'unite_imu_method': '0',
             'initial_reset': 'true',
-            # Hardware sync settings - MASTER
             'inter_cam_sync_mode': '1',
-            # Depth settings
             'depth_module.min_distance': '0.3',
-            'depth_module.max_distance': '10.0',
+            'depth_module.max_distance': '20.0',
             'depth_module.visual_preset': '4',
-            # Filters
             'spatial_filter.enable': 'true',
             'spatial_filter.magnitude': '2',
             'spatial_filter.smooth_alpha': '0.5',
             'spatial_filter.smooth_delta': '20',
-            'temporal_filter.enable': 'false',
-          
-            # Auto exposure
-            'depth_module.enable_auto_exposure': 'false',
-            'rgb_camera.enable_auto_exposure': 'false'
+            'temporal_filter.enable': 'true',
+            'temporal_filter.smooth_alpha': '0.4',
+            'temporal_filter.smooth_delta': '20',
+            'depth_module.enable_auto_exposure': 'true',
+            'rgb_camera.enable_auto_exposure': 'true'
         }.items()
     )
 
@@ -75,33 +69,30 @@ def generate_launch_description():
             'camera_namespace': 'camera_right',
             'camera_name': 'camera_right',
             'serial_no': ['_', LaunchConfiguration('right_serial')],
-              'enable_gyro': 'false',
+            'enable_gyro': 'false',
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,480,30',
-            'rgb_camera.color_profile': '640,480,30',
-            
+            'depth_module.depth_profile': '424,240,30',
+            'rgb_camera.color_profile': '424,240,30',
+            'depth_module.emitter_enabled': '1',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
             'unite_imu_method': '0',
             'initial_reset': 'true',
-            # Hardware sync settings - MASTER
-            'inter_cam_sync_mode': '1',
-            # Depth settings
+            'inter_cam_sync_mode': '2',
             'depth_module.min_distance': '0.3',
-            'depth_module.max_distance': '10.0',
+            'depth_module.max_distance': '20.0',
             'depth_module.visual_preset': '4',
-            # Filters
             'spatial_filter.enable': 'true',
             'spatial_filter.magnitude': '2',
             'spatial_filter.smooth_alpha': '0.5',
             'spatial_filter.smooth_delta': '20',
-            'temporal_filter.enable': 'false',
-          
-            # Auto exposure
-            'depth_module.enable_auto_exposure': 'false',
-            'rgb_camera.enable_auto_exposure': 'false'
+            'temporal_filter.enable': 'true',
+            'temporal_filter.smooth_alpha': '0.4',
+            'temporal_filter.smooth_delta': '20',
+            'depth_module.enable_auto_exposure': 'true',
+            'rgb_camera.enable_auto_exposure': 'true'
         }.items()
     )
 
@@ -114,36 +105,66 @@ def generate_launch_description():
             'camera_namespace': 'camera_left',
             'camera_name': 'camera_left',
             'serial_no': ['_', LaunchConfiguration('left_serial')],
-             'enable_gyro': 'false',
+            'enable_gyro': 'false',
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,480,30',
-            'rgb_camera.color_profile': '640,480,30',
-            
+            'depth_module.depth_profile': '424,240,30',
+            'rgb_camera.color_profile': '424,240,30',
+            'depth_module.emitter_enabled': '1',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
-            'unite_imu_method': '0',
             'initial_reset': 'true',
-            # Hardware sync settings - MASTER
-            'inter_cam_sync_mode': '1',
-            # Depth settings
+            'inter_cam_sync_mode': '2',
             'depth_module.min_distance': '0.3',
-            'depth_module.max_distance': '10.0',
+            'depth_module.max_distance': '20.0',
             'depth_module.visual_preset': '4',
-            # Filters
             'spatial_filter.enable': 'true',
             'spatial_filter.magnitude': '2',
             'spatial_filter.smooth_alpha': '0.5',
             'spatial_filter.smooth_delta': '20',
-            'temporal_filter.enable': 'false',
-          
-            # Auto exposure
-            'depth_module.enable_auto_exposure': 'false',
-            'rgb_camera.enable_auto_exposure': 'false'
+            'temporal_filter.enable': 'true',
+            'temporal_filter.smooth_alpha': '0.4',
+            'temporal_filter.smooth_delta': '20',
+            'depth_module.enable_auto_exposure': 'true',
+            'rgb_camera.enable_auto_exposure': 'true'
         }.items()
     )
-
+    
+    # Down D415 - SLAVE
+    down_camera_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(get_package_share_directory('realsense2_camera'), 'launch'),
+            '/rs_launch.py']),
+        launch_arguments={
+            'camera_namespace': 'camera_down',
+            'camera_name': 'camera_down',
+            'serial_no': ['_', LaunchConfiguration('down_serial')],
+            'enable_gyro': 'false',
+            'enable_accel': 'false',
+            'align_depth.enable': 'true',
+            'enable_sync': 'true',
+            'depth_module.depth_profile': '424,240,15',
+            'rgb_camera.color_profile': '424,240,15',
+            'depth_module.emitter_enabled': '1',
+            'enable_infra1': 'false',
+            'enable_infra2': 'false',
+            'initial_reset': 'true',
+            'inter_cam_sync_mode': '2',
+            'depth_module.min_distance': '0.1',
+            'depth_module.max_distance': '10.0',
+            'depth_module.visual_preset': '4',
+            'spatial_filter.enable': 'true',
+            'spatial_filter.magnitude': '2',
+            'spatial_filter.smooth_alpha': '0.5',
+            'spatial_filter.smooth_delta': '20',
+            'temporal_filter.enable': 'true',
+            'temporal_filter.smooth_alpha': '0.4',
+            'temporal_filter.smooth_delta': '20',
+            'depth_module.enable_auto_exposure': 'true',
+            'rgb_camera.enable_auto_exposure': 'true'
+        }.items()
+    )
 
     # RGBD Sync nodes
     front_rgbd_sync = Node(
@@ -154,9 +175,9 @@ def generate_launch_description():
         namespace='camera_front',
         parameters=[{
             'approx_sync': True,
-            'approx_sync_max_interval': 0.1,  # Increased tolerance
+            'approx_sync_max_interval': 0.1,
             'use_sim_time': False,
-            'queue_size': 50,  # Increased buffer
+            'queue_size': 50,
         }],
         remappings=[
             ('rgb/image', '/camera_front/camera_front/color/image_raw'),
@@ -174,9 +195,9 @@ def generate_launch_description():
         namespace='camera_right',
         parameters=[{
             'approx_sync': True,
-            'approx_sync_max_interval': 0.1,  # Increased tolerance
+            'approx_sync_max_interval': 0.1,
             'use_sim_time': False,
-            'queue_size': 50,  # Increased buffer
+            'queue_size': 50,
         }],
         remappings=[
             ('rgb/image', '/camera_right/camera_right/color/image_raw'),
@@ -194,9 +215,9 @@ def generate_launch_description():
         namespace='camera_left',
         parameters=[{
             'approx_sync': True,
-            'approx_sync_max_interval': 0.1,  # Increased tolerance
+            'approx_sync_max_interval': 0.1,
             'use_sim_time': False,
-            'queue_size': 50,  # Increased buffer
+            'queue_size': 50,
         }],
         remappings=[
             ('rgb/image', '/camera_left/camera_left/color/image_raw'),
@@ -205,43 +226,47 @@ def generate_launch_description():
             ('rgbd_image', '/camera_left/rgbd_image')
         ]
     )
-
+    imu_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_to_front_camera_tf',
+        arguments=['0', '0.0', '0', '0', '0', '0', 'base_link', 'imu_link']
+    )
     # Static transforms for cameras
     front_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_front_camera_tf',
-        arguments=['0.107', '0.0', '-0.44', '0', '0', '0', 'base_link', 'camera_front_link']
+        arguments=['0.107', '0.0', '-0.044', '0', '0', '0', 'base_link', 'camera_front_link']
     )
 
     left_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_left_camera_tf',
-        arguments=['0', '0.102', '-0.44', '1.5708', '0', '0', 'base_link', 'camera_left_link']
+        arguments=['0', '0.102', '-0.044', '1.5708', '0', '0', 'base_link', 'camera_left_link']
     )
 
     right_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_right_camera_tf',
-        arguments=['0', '-0.102', '-0.44', '-1.5708', '0', '0', 'base_link', 'camera_right_link']
+        arguments=['0', '-0.102', '-0.044', '-1.5708', '0', '0', 'base_link', 'camera_right_link']
     )
     down_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_down_camera_tf',
-        arguments=['0.07', '0.0', '-0.77', '0', '-1.5708', '0', 'base_link', 'camera_down_link']
+        arguments=['0.07', '0.0', '-0.077', '0', '-1.5708', '0', 'base_link', 'camera_down_link']
     )
     back_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_back_camera_tf',
-        arguments=['-0.107', '0.0', '-0.44', '3.1416', '0', '0', 'base_link', 'camera_back_link']
+        arguments=['-0.107', '0.0', '-0.044', '3.1416', '0', '0', 'base_link', 'camera_back_link']
     )
 
-
-    # RTAB-Map visual odometry - NOW WITH OPENGV: All 3 cameras for 360° coverage
+    # RTAB-Map visual odometry
     rtabmap_odom = Node(
     package='rtabmap_odom',
     executable='rgbd_odometry',
@@ -254,15 +279,15 @@ def generate_launch_description():
         'publish_tf': True,
         'wait_for_transform': 0.5,
         
-        # Synchronization - Optimized for LOW LATENCY
+        # Synchronization - Critical for multi-camera
         'approx_sync': True,
-        'queue_size': 5,  # REDUCED - process recent frames only
-        'slop': 0.1,  # Tighter sync for lower latency
-        'always_process_most_recent_frame': False,  # CHANGED - drop old frames!
+        'queue_size': 50,  # Increased for better sync
+        'slop': 0.15,  # More timing slack for multi-camera
+        'always_process_most_recent_frame': False,
         
         # Multi-camera setup
         'subscribe_rgbd': True,
-        'subscribe_imu': False,
+        'subscribe_imu': True,
         'rgbd_cameras': 3,  # Using 3 cameras
         
         # ═══════════════════════════════════════════════════════════
@@ -275,13 +300,13 @@ def generate_launch_description():
         # VISUAL ODOMETRY - Optimized for sparse features
         # ═══════════════════════════════════════════════════════════
         'Vis/FeatureType': '8',  # ORB features (good for low-texture)
-        'Vis/MaxFeatures': '2000',  # Significantly increased to find more features
+        'Vis/MaxFeatures': '3000',  # Significantly increased to find more features
         'Vis/MinInliers': '5',  # REDUCED - more permissive for sparse features
         'Vis/Iterations': '300',  # More iterations for convergence
         'Vis/InlierDistance': '0.3',  # INCREASED - more permissive
         'Vis/CorNNDR': '0.85',  # INCREASED - more permissive matching ratio
         'Vis/MaxDepth': '5.0',  # Increased to use more of the scene
-        'Vis/MinDepth': '0.15',  # Avoid very close features
+        'Vis/MinDepth': '0.1',  # Avoid very close features
         'Vis/EstimationType': '1',  # PnP estimation
         'Vis/PnPReprojError': '3.0',  # More permissive reprojection error
         'Vis/EpipolarGeometryVar': '0.1',  # More permissive epipolar check
@@ -302,9 +327,9 @@ def generate_launch_description():
         # ODOMETRY STRATEGY - Frame-to-Map with ICP fallback
         # ═══════════════════════════════════════════════════════════
         'Odometry/Strategy': '0',  # Frame-to-Map
-        'Odometry/MaxFeatures': '2000',
+        'Odometry/MaxFeatures': '3000',
         'Odometry/MinInliers': '5',  # REDUCED for sparse features
-        'Odometry/Iterations': '200',
+        'Odometry/Iterations': '300',
         'Odom/FilteringStrategy': '1',
         'Odom/GuessMotion': 'true',  # ENABLED - use motion model
         'Odom/ResetCountdown': '5',  # Reset after 5 failed frames
@@ -408,9 +433,9 @@ def generate_launch_description():
         ('rgbd_image0', '/camera_front/rgbd_image'),
         ('rgbd_image1', '/camera_right/rgbd_image'),
         ('rgbd_image2', '/camera_left/rgbd_image'),
+        ('imu','/mavros/imu/data')
     ]
 )
-    # RTAB-Map SLAM node - Optimized for loop closure
     rtabmap_node = Node(
         package='rtabmap_slam',
         executable='rtabmap',
@@ -487,83 +512,59 @@ def generate_launch_description():
         ],
         arguments=['-d']  # Delete old database
     )
-    # Declare QR detection arguments
-    declare_enable_qr = DeclareLaunchArgument(
-        'enable_qr_labeling',
-        default_value='true',
-        description='Enable QR code detection and labeling'
-    )
-    
-    declare_model_path = DeclareLaunchArgument(
-        'model_path',
-        default_value='/home/aero/best.pt',
-        description='Path to the YOLOv8 model'
-    )
-    
-    declare_qr_csv = DeclareLaunchArgument(
-        'qr_csv_file',
-        default_value='qr_data.csv',
-        description='Path to CSV file for QR data'
-    )
-    
-    declare_qr_images = DeclareLaunchArgument(
-        'qr_images_dir',
-        default_value='images',
-        description='Directory to store QR code images'
-    )
-    
-    declare_qr_interval = DeclareLaunchArgument(
-        'qr_detection_interval',
-        default_value='1.0',
-        description='Minimum interval between QR detections'
-    )
-
-    # QR Detection node
-    qr = Node(
-        package='slam',
-        executable='qr_detection_node',
-        name='qr_standalone_labeling_node',
+    # Odometry to Vision Pose Bridge (for MAVROS VIO)
+    odom_to_vision = Node(
+        package='slam',  # Replace with your package name
+        executable='odom_converter',
+        name='odom_to_vision_pose',
         output='screen',
-        condition=IfCondition(LaunchConfiguration('enable_qr_labeling')),
         parameters=[{
-            'model_path': LaunchConfiguration('model_path'),
-            'camera_topic': '/camera_front/camera_front/color/image_raw',
-            'csv_file': LaunchConfiguration('qr_csv_file'),
-            'images_dir': LaunchConfiguration('qr_images_dir'),
-            'min_detection_interval': LaunchConfiguration('qr_detection_interval'),
-            'odom_topic': '/odom'
+            'use_enu_to_ned': True,  # Set to True if using ArduPilot/PX4
+            'send_twist': True
         }]
     )
-    
 
-
+    # Rangefinder Node (for terrain following/POSHOLD/LOITER)
+    rangefinder_node = Node(
+        package='slam',  # Replace with your package name
+        executable='rangefinder',
+        name='rangefinder_node',
+        output='screen'
+    )
+    imu_node = Node(
+            package='imu_filter_madgwick', 
+            executable='imu_filter_madgwick_node', 
+            output='screen',
+            parameters=[{'use_mag': False, 
+                         'world_frame':'enu', 
+                         'publish_tf':False}],
+            remappings=[('imu/data_raw', '/mavros/imu/data')])
     return LaunchDescription([
         # Camera serial number arguments
         declare_front_serial,
         declare_right_serial,
         declare_left_serial,
-        # QR detection arguments
-        declare_enable_qr,
-        declare_model_path,
-        declare_qr_csv,
-        declare_qr_images,
-        declare_qr_interval,
+        declare_down_serial,
         # Transform nodes
         front_tf,
         right_tf,
         left_tf,
+        down_tf,
         # Camera nodes
         front_camera_launch,
         right_camera_launch,
         left_camera_launch,
+        down_camera_launch,
         # RGBD sync nodes
         front_rgbd_sync,
         right_rgbd_sync,
         left_rgbd_sync,
         # SLAM nodes
         rtabmap_odom,
-        
-        # rtabmap_node,
-       
-        qr
+        rtabmap_node,
+        # MAVROS bridge nodes
+        odom_to_vision,
+        rangefinder_node,
+        imu_tf,
+        imu_node
     ])

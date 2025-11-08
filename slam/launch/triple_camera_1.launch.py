@@ -12,15 +12,21 @@ def generate_launch_description():
 
     # Declare serial numbers
     declare_front_serial = DeclareLaunchArgument(
-        'front_serial', default_value='327122076542',
+        'front_serial', default_value='310222076155',
         description='Serial number of front D435i camera')
     declare_right_serial = DeclareLaunchArgument(
-        'right_serial', default_value='310222076155',
+        'right_serial', default_value='327322061348',
         description='Serial number of right D435i camera')
     declare_left_serial = DeclareLaunchArgument(
         'left_serial', default_value='319522067209',
         description='Serial number of left D415 camera')
-
+        
+    declare_down_serial = DeclareLaunchArgument(
+        'down_serial', default_value='323522061991',
+        description='Serial number of down D415 camera')
+    declare_back_serial = DeclareLaunchArgument(
+        'back_serial', default_value='327122076542',
+        description='Serial number of back D415 camera')
     # Front D435i - MASTER
     front_camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -206,96 +212,205 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_front_camera_tf',
-        arguments=['0.07', '0.0', '0.05', '0', '0', '0', 'base_link', 'camera_front_link']
+        arguments=['0.107', '0.0', '-0.44', '0', '0', '0', 'base_link', 'camera_front_link']
     )
 
     left_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_left_camera_tf',
-        arguments=['-0.09', '0.1210', '0.05', '1.5708', '0', '0', 'base_link', 'camera_left_link']
+        arguments=['0', '0.102', '-0.44', '1.5708', '0', '0', 'base_link', 'camera_left_link']
     )
 
     right_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_right_camera_tf',
-        arguments=['-0.09', '-0.1210', '0.05', '-1.5708', '0', '0', 'base_link', 'camera_right_link']
+        arguments=['0', '-0.102', '-0.44', '-1.5708', '0', '0', 'base_link', 'camera_right_link']
     )
+    down_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_to_down_camera_tf',
+        arguments=['0.07', '0.0', '-0.77', '0', '-1.5708', '0', 'base_link', 'camera_down_link']
+    )
+    back_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_to_back_camera_tf',
+        arguments=['-0.107', '0.0', '-0.44', '3.1416', '0', '0', 'base_link', 'camera_back_link']
+    )
+
 
     # RTAB-Map visual odometry - NOW WITH OPENGV: All 3 cameras for 360° coverage
     rtabmap_odom = Node(
-        package='rtabmap_odom',
-        executable='rgbd_odometry',
-        name='rtabmap_odom',
-        output='screen',
-        parameters=[{
-            'frame_id': 'base_link',
-            'odom_frame_id': 'odom',
-            'publish_tf': True,
-            'wait_for_transform': 0.5,
-            'approx_sync': True,
-            'always_process_most_recent_frame': False,  # Don't drop frames aggressively
-            'queue_size': 50,  # Increased from default
-            'slop': 0.1,  # Allow more timing slack
-            'subscribe_rgbd': True,
-            'subscribe_imu': True,
-            'rgbd_cameras': 3,  # ALL 3 cameras - OpenGV enables this!
-            'Reg/strategy': '0',  # Use OpenGV
-            # Odometry parameters
-            'Vis/FeatureType': '8',  # Using ORB features for Jetson
-          'Vis/MaxFeatures': '2000',  # Increased features
-          'Vis/MinInliers': '8',    # More permissive
-          'Vis/Iterations': '250',   # More iterations
-          'Vis/InlierDistance': '0.2', # More permissive distance
-          'Vis/CorNNDR': '0.8',     # More permissive matching
-          'Vis/MaxDepth': '3.0',    # Increased max depth
-          'Vis/MinDepth': '0.0',    # Minimum depth threshold
-          # Grid Parameters
-          'Grid/RangeMax': '3.0',
-          'Grid/CellSize': '0.05',
-          'Grid/MaxObstacleHeight': '3.0',
-          'Grid/MinClusterSize': '20',
-          'Grid/NormalsSegmentation': 'True',
-          'Grid/FlatObstacleDetected': 'True',
-          'Grid/GroundIsObstacle': 'False',
-          'Grid/NoiseFilteringRadius': '0.15',
-          'Grid/NoiseFilteringMinNeighbors': '15',
-          'Kp/DetectorStrategy': '8',
-          'GFTT/Gpu': 'true',
-          
-          
-          # Odometry Parameters
-          'Odometry/Strategy': '0',    # Frame-to-Map (more robust)
-          'Odometry/MaxFeatures': '2000',   # Increased features
-          'Odometry/MinInliers': '8',      # More permissive
-          'Odometry/Iterations': '250',     # Balanced iterations
-          'Odom/FilteringStrategy': '1',
-          'Odom/GuessMotion': 'false',
-          'RGBD/NeighborLinkRefining': 'True',
-          # Loop Closure and Map Management
-          'RGBD/LocalImmunizationRatio': '0.4',  # Increased from default 0.25
-          'Mem/LocalSpaceLinksKept': 'true',    # Keep local space links
-          'RGBD/LocalLoopDetectionRadius': '10', # Local loop closure radius
-          'RGBD/LocalLoopDetectionTime': '10',   # Time window for local loop detection
-          'Rtabmap/DetectionRate': '2',     # Increased detection rate
-          'Rtabmap/LoopThr': '0.15',        # More permissive loop closure
-          'Optimizer/Iterations': '100',     # More iterations for better optimization
-          'Optimizer/Strategy': '0',
-          'g2o/PixelVariance': '0.3',
-          'Vis/EstimationType': '1',         # Added: Use PnP estimation
-          # Memory and Performance
-          'Mem/STMSize': '30',
-          'Mem/RecentWmRatio': '0.4',
-          'Rtabmap/TimeThr': '1000',
-        }],
-        remappings=[
-             ('rgbd_image0', '/camera_front/rgbd_image'),
-            ('rgbd_image1', '/camera_right/rgbd_image'),
-            ('rgbd_image2', '/camera_left/rgbd_image'),
-            ('imu', '/mavros/imu/data')  # Not used, but required by the node
-        ]
-    )
+    package='rtabmap_odom',
+    executable='rgbd_odometry',
+    name='rtabmap_odom',
+    output='screen',
+    parameters=[{
+        # Frame Configuration
+        'frame_id': 'base_link',
+        'odom_frame_id': 'odom',
+        'publish_tf': True,
+        'wait_for_transform': 0.5,
+        
+        # Synchronization - Critical for multi-camera
+        'approx_sync': True,
+        'queue_size': 50,  # Increased for better sync
+        'slop': 0.15,  # More timing slack for multi-camera
+        'always_process_most_recent_frame': False,
+        
+        # Multi-camera setup
+        'subscribe_rgbd': True,
+        'subscribe_imu': False,
+        'rgbd_cameras': 3,  # Using 3 cameras
+        
+        # ═══════════════════════════════════════════════════════════
+        # REGISTRATION STRATEGY - Critical for low-texture
+        # ═══════════════════════════════════════════════════════════
+        'Reg/Strategy': '1',  # Changed to 1 (ICP) for better low-texture handling
+        'Reg/Force3DoF': 'false',  # Allow full 6DOF
+        
+        # ═══════════════════════════════════════════════════════════
+        # VISUAL ODOMETRY - Optimized for sparse features
+        # ═══════════════════════════════════════════════════════════
+        'Vis/FeatureType': '8',  # ORB features (good for low-texture)
+        'Vis/MaxFeatures': '3000',  # Significantly increased to find more features
+        'Vis/MinInliers': '5',  # REDUCED - more permissive for sparse features
+        'Vis/Iterations': '300',  # More iterations for convergence
+        'Vis/InlierDistance': '0.3',  # INCREASED - more permissive
+        'Vis/CorNNDR': '0.85',  # INCREASED - more permissive matching ratio
+        'Vis/MaxDepth': '5.0',  # Increased to use more of the scene
+        'Vis/MinDepth': '0.1',  # Avoid very close features
+        'Vis/EstimationType': '1',  # PnP estimation
+        'Vis/PnPReprojError': '3.0',  # More permissive reprojection error
+        'Vis/EpipolarGeometryVar': '0.1',  # More permissive epipolar check
+        
+        # Feature Detection Strategy
+        'Kp/DetectorStrategy': '8',  # ORB detector
+        'GFTT/Gpu': 'true',
+        'GFTT/MinDistance': '3',  # Reduced to allow more features
+        'GFTT/QualityLevel': '0.0001',  # REDUCED - detect weaker corners
+        
+        # ORB specific parameters
+        'ORB/EdgeThreshold': '15',  # Reduced to detect more edge features
+        'ORB/ScaleFactor': '1.2',
+        'ORB/NLevels': '8',
+        'ORB/Gpu': 'true',
+        
+        # ═══════════════════════════════════════════════════════════
+        # ODOMETRY STRATEGY - Frame-to-Map with ICP fallback
+        # ═══════════════════════════════════════════════════════════
+        'Odometry/Strategy': '0',  # Frame-to-Map
+        'Odometry/MaxFeatures': '3000',
+        'Odometry/MinInliers': '5',  # REDUCED for sparse features
+        'Odometry/Iterations': '300',
+        'Odom/FilteringStrategy': '1',
+        'Odom/GuessMotion': 'true',  # ENABLED - use motion model
+        'Odom/ResetCountdown': '5',  # Reset after 5 failed frames
+        'Odom/FillInfoData': 'true',
+        'Odom/Holonomic': 'false',  # Assume non-holonomic motion
+        
+        # ICP parameters - Important for low-texture areas
+        'Icp/MaxTranslation': '2.0',  # Allow larger translations
+        'Icp/MaxRotation': '0.78',  # ~45 degrees
+        'Icp/VoxelSize': '0.05',  # Point cloud downsampling
+        'Icp/PointToPlane': 'true',  # Better for planar surfaces
+        'Icp/Iterations': '50',
+        'Icp/Epsilon': '0.001',
+        'Icp/MaxCorrespondenceDistance': '0.3',  # Increased
+        'Icp/CorrespondenceRatio': '0.2',  # REDUCED - more permissive
+        'Icp/OutlierRatio': '0.85',  # Allow more outliers
+        
+        # ═══════════════════════════════════════════════════════════
+        # RGBD PARAMETERS
+        # ═══════════════════════════════════════════════════════════
+        'RGBD/NeighborLinkRefining': 'true',
+        'RGBD/ProximityBySpace': 'true',
+        'RGBD/ProximityPathMaxNeighbors': '5',
+        'RGBD/OptimizeFromGraphEnd': 'false',
+        'RGBD/OptimizeMaxError': '10.0',  # Increased tolerance
+        'RGBD/LocalRadius': '5',  # Reduced for faster processing
+        'RGBD/LocalImmunizationRatio': '0.5',
+        'RGBD/LocalLoopDetectionRadius': '15',  # Increased for warehouse
+        'RGBD/LocalLoopDetectionTime': '15',
+        'RGBD/LinearUpdate': '0.05',  # Update every 5cm
+        'RGBD/AngularUpdate': '0.05',  # Update every ~3 degrees
+        
+        # ═══════════════════════════════════════════════════════════
+        # GRID/OCCUPANCY PARAMETERS - For navigation
+        # ═══════════════════════════════════════════════════════════
+        'Grid/RangeMax': '5.0',  # Increased for warehouse
+        'Grid/CellSize': '0.05',
+        'Grid/MaxObstacleHeight': '3.0',
+        'Grid/MinClusterSize': '15',  # Reduced
+        'Grid/NormalsSegmentation': 'true',
+        'Grid/FlatObstacleDetected': 'true',
+        'Grid/GroundIsObstacle': 'false',
+        'Grid/NoiseFilteringRadius': '0.1',  # Reduced
+        'Grid/NoiseFilteringMinNeighbors': '10',  # Reduced
+        'Grid/Sensor': '0',  # Depth camera
+        
+        # ═══════════════════════════════════════════════════════════
+        # MEMORY MANAGEMENT
+        # ═══════════════════════════════════════════════════════════
+        'Mem/STMSize': '50',  # Increased short-term memory
+        'Mem/RecentWmRatio': '0.3',  # Balance between recent and long-term
+        'Mem/LocalSpaceLinksKept': 'true',
+        'Mem/IncrementalMemory': 'true',
+        'Mem/InitWMWithAllNodes': 'false',
+        'Mem/ReduceGraph': 'false',  # Don't reduce graph for better accuracy
+        
+        # ═══════════════════════════════════════════════════════════
+        # LOOP CLOSURE - Relaxed for warehouse
+        # ═══════════════════════════════════════════════════════════
+        'Rtabmap/DetectionRate': '1',  # Detect every frame
+        'Rtabmap/LoopThr': '0.11',  # REDUCED - more permissive
+        'Rtabmap/LoopRatio': '0.5',  # Less strict
+        'Rtabmap/TimeThr': '2000',  # Increased time threshold
+        'Rtabmap/MemoryThr': '0',  # Unlimited memory
+        'Rtabmap/StartNewMapOnLoopClosure': 'false',
+        
+        # ═══════════════════════════════════════════════════════════
+        # OPTIMIZER - g2o for better optimization
+        # ═══════════════════════════════════════════════════════════
+        'Optimizer/Strategy': '1',  # g2o optimizer (better than TORO)
+        'Optimizer/Iterations': '150',  # More iterations
+        'Optimizer/Epsilon': '0.0001',
+        'Optimizer/Robust': 'true',
+        'Optimizer/VarianceIgnored': 'false',
+        'g2o/Solver': '0',  # PCG solver
+        'g2o/Optimizer': '0',  # Levenberg-Marquardt
+        'g2o/PixelVariance': '0.5',  # INCREASED - less confident in pixels
+        'g2o/RobustKernelDelta': '8.0',
+        
+        # ═══════════════════════════════════════════════════════════
+        # MULTI-CAMERA STEREO PARAMETERS
+        # ═══════════════════════════════════════════════════════════
+        'Stereo/MaxDisparity': '128.0',
+        'Stereo/OpticalFlow': 'true',
+        'Stereo/Iterations': '50',
+        'Stereo/Eps': '0.01',
+        'Stereo/MaxLevel': '3',
+        'Stereo/WinSize': '15',
+        
+        # ═══════════════════════════════════════════════════════════
+        # DIAGNOSTIC & OUTPUT
+        # ═══════════════════════════════════════════════════════════
+        'Rtabmap/PublishStats': 'true',
+        'Rtabmap/PublishLastSignature': 'true',
+        'Rtabmap/PublishLikelihood': 'true',
+        'Rtabmap/PublishPdf': 'false',
+        'Rtabmap/StatisticLogsBufferedInRAM': 'false',
+        
+    }],
+    remappings=[
+        ('rgbd_image0', '/camera_front/rgbd_image'),
+        ('rgbd_image1', '/camera_right/rgbd_image'),
+        ('rgbd_image2', '/camera_left/rgbd_image'),
+    ]
+)
 
     # RTAB-Map SLAM node - Optimized for loop closure
     rtabmap_node = Node(
@@ -447,7 +562,7 @@ def generate_launch_description():
         left_rgbd_sync,
         # SLAM nodes
         rtabmap_odom,
-        rtabmap_node,
-        # QR detection node
+        # rtabmap_node,
+       
         qr
     ])

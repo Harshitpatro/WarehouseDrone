@@ -125,7 +125,7 @@ def generate_launch_description():
             'enable_qr_labeling', default_value='true',
             description='Enable QR code detection and labeling'),
         DeclareLaunchArgument(
-            'front_serial', default_value='327122076542',
+            'front_serial', default_value='310222076155',
             description='Serial number of front D435i camera'),
         DeclareLaunchArgument(
             'model_path', default_value='/home/aero/best.pt',

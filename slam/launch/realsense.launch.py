@@ -10,10 +10,10 @@ def generate_launch_description():
 
     # Declare serial numbers
     declare_front_serial = DeclareLaunchArgument(
-        'front_serial', default_value='327122076542',
+        'front_serial', default_value='310222076155',
         description='Serial number of front D435i camera')
     declare_right_serial = DeclareLaunchArgument(
-        'right_serial', default_value='310222076155',
+        'right_serial', default_value='327322061348',
         description='Serial number of right D435i camera')
     declare_left_serial = DeclareLaunchArgument(
         'left_serial', default_value='319522067209',
@@ -23,7 +23,7 @@ def generate_launch_description():
         'down_serial', default_value='323522061991',
         description='Serial number of down D415 camera')
     declare_back_serial = DeclareLaunchArgument(
-        'back_serial', default_value='327322061348',
+        'back_serial', default_value='327122076542',
         description='Serial number of back D415 camera')
 
     front_camera_launch = IncludeLaunchDescription(
@@ -38,8 +38,8 @@ def generate_launch_description():
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,360,30',
-            'rgb_camera.color_profile': '640,360,30',
+            'depth_module.depth_profile': '424,240,30',
+            'rgb_camera.color_profile': '424,240,30',
             'depth_module.emitter_enabled': '0',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
@@ -61,8 +61,8 @@ def generate_launch_description():
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,360,30',
-            'rgb_camera.color_profile': '640,360,30',
+            'depth_module.depth_profile': '424,240,30',
+            'rgb_camera.color_profile': '424,240,30',
             'depth_module.emitter_enabled': '0',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
@@ -84,8 +84,8 @@ def generate_launch_description():
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,360,30',
-            'rgb_camera.color_profile': '640,360,30',
+            'depth_module.depth_profile': '424,240,30',
+            'rgb_camera.color_profile': '424,240,30',
             'depth_module.emitter_enabled': '0',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
@@ -103,8 +103,8 @@ def generate_launch_description():
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,360,30',
-            'rgb_camera.color_profile': '640,360,30',
+            'depth_module.depth_profile': '424,240,15',
+            'rgb_camera.color_profile': '424,240,15',
             'depth_module.emitter_enabled': '0',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
@@ -122,8 +122,8 @@ def generate_launch_description():
             'enable_accel': 'false',
             'align_depth.enable': 'true',
             'enable_sync': 'true',
-            'depth_module.depth_profile': '640,360,30',
-            'rgb_camera.color_profile': '640,360,30',
+            'depth_module.depth_profile': '424,240,15',
+            'rgb_camera.color_profile': '424,240,15',
             'depth_module.emitter_enabled': '0',
             'enable_infra1': 'false',
             'enable_infra2': 'false',
@@ -134,33 +134,93 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_front_camera_tf',
-        arguments=['0.07', '0.0', '0.05', '0', '0', '0', 'base_link', 'camera_front_link']
+        arguments=['0.107', '0.0', '-0.44', '0', '0', '0', 'base_link', 'camera_front_link']
     )
 
     left_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_left_camera_tf',
-        arguments=['-0.09', '0.1210', '0.05', '1.5708', '0', '0', 'base_link', 'camera_left_link']
+        arguments=['0', '0.102', '-0.44', '1.5708', '0', '0', 'base_link', 'camera_left_link']
     )
 
     right_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_right_camera_tf',
-        arguments=['-0.09', '-0.1210', '0.05', '-1.5708', '0', '0', 'base_link', 'camera_right_link']
+        arguments=['0', '-0.102', '-0.44', '-1.5708', '0', '0', 'base_link', 'camera_right_link']
     )
     down_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_down_camera_tf',
-        arguments=['0.07', '0.0', '-0.03', '3.1416', '0', '0', 'base_link', 'camera_down_link']
+        arguments=['0.07', '0.0', '-0.77', '0', '-1.5708', '0', 'base_link', 'camera_down_link']
     )
     back_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_back_camera_tf',
-        arguments=['0.07', '0.0', '-0.03', '3.1416', '0', '0', 'base_link', 'camera_back_link']
+        arguments=['-0.107', '0.0', '-0.44', '3.1416', '0', '0', 'base_link', 'camera_back_link']
+    )
+    republish_front_color = Node(
+        package='image_transport',
+        executable='republish',
+        name='republish_front_color',
+        output='screen',
+        arguments=[
+            'raw', 'compressed',
+            '--ros-args',
+            '-r', 'in:=/camera_front/camera_front/color/image_raw',
+            '-r', 'out:=/camera_front/camera_front/color/image_raw/compressed'
+        ]
+    )
+    republish_left_color = Node(
+        package='image_transport',
+        executable='republish',
+        name='republish_front_color',
+        output='screen',
+        arguments=[
+            'raw', 'compressed',
+            '--ros-args',
+            '-r', 'in:=/camera_left/camera_left/color/image_raw',
+            '-r', 'out:=/camera_left/camera_left/color/image_raw/compressed'
+        ]
+    )
+    republish_right_color = Node(
+        package='image_transport',
+        executable='republish',
+        name='republish_right_color',
+        output='screen',
+        arguments=[
+            'raw', 'compressed',
+            '--ros-args',
+            '-r', 'in:=/camera_right/camera_right/color/image_raw',
+            '-r', 'out:=/camera_right/camera_right/color/image_raw/compressed'
+        ]
+    )
+    republish_down_color = Node(
+        package='image_transport',
+        executable='republish',
+        name='republish_down_color',
+        output='screen',
+        arguments=[
+            'raw', 'compressed',
+            '--ros-args',
+            '-r', 'in:=/camera_down/camera_down/color/image_raw',
+            '-r', 'out:=/camera_down/camera_down/color/image_raw/compressed'
+        ]
+    )
+    republish_back_color = Node(
+        package='image_transport',
+        executable='republish',
+        name='republish_back_color',
+        output='screen',
+        arguments=[
+            'raw', 'compressed',
+            '--ros-args',
+            '-r', 'in:=/camera_back/camera_back/color/image_raw',
+            '-r', 'out:=/camera_back/camera_back/color/image_raw/compressed'
+        ]
     )
     return LaunchDescription([
         declare_front_serial,
@@ -171,11 +231,16 @@ def generate_launch_description():
         front_tf,
         right_tf,
         left_tf,
-        down_tf,
+         down_tf,
         back_tf,
         front_camera_launch,
         right_camera_launch,
         left_camera_launch,
         down_camera_launch,
         back_camera_launch,
+        republish_front_color,
+        republish_left_color,
+        republish_right_color,
+        republish_down_color,
+        republish_back_color
     ])

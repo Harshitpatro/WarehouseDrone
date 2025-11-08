@@ -27,11 +27,12 @@ setup(
     entry_points={
         'console_scripts': [
             'qr_detection_node = slam.scripts.qr_detection_node:main',
-            'rgbd_images_sync = slam.scripts.rgbd_images_sync:main',
+            'rangefinder = slam.scripts.rangefinder:main',
             'imu_diagnostics = slam.scripts.imu_diagonstic:main',
-            'height_fusion_node = slam.height_fusion_node:main',
-            'ground_plane_publisher = slam.ground_plane_publisher:main',
-            'height_monitor = slam.height_monitor:main',
+            'multi_camera_vio = slam.scripts.multi_camera_vio:main',
+            'landing = slam.scripts.landing:main',
+            'height_monitor = slam.scripts.height_monitor:main',
+            'odom_converter = slam.scripts.odom_converter:main',
         ],
     },
     package_data={
